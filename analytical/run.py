@@ -8,7 +8,11 @@ parser = argparse.ArgumentParser(description="MC/DC verification - analytical")
 parser.add_argument("--srun", type=int, default=0)
 parser.add_argument("--mpiexec", type=int, default=0)
 parser.add_argument("--mpirun", type=int, default=0)
+parser.add_argument("--name", type=str, default="ALL")
 args, unargs = parser.parse_known_args()
+
+# Get names
+name_selected = args.name
 
 # Set MPI command
 mpi_command = ""
@@ -27,8 +31,16 @@ Path("results").mkdir(parents=True, exist_ok=True)
 with open("task.yaml", "r") as file:
     tasks = yaml.safe_load(file)
 
+# Check if selected name is listed in the task
+if name_selected != "ALL" and name_selected not in tasks:
+    print(" [ERROR] Selected name '%s' is not in the task list." % name_selected)
+    exit()
+
 # Loop over tasks
 for name in tasks:
+    if name_selected != "ALL" and name != name_selected:
+        continue
+
     # Get into the task folder
     os.chdir(name)
 
